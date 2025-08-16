@@ -29,6 +29,7 @@ app.use(morgan('dev'));
 app.use(session({
   secret: process.env.SESSION_SECRET || 'change-me-session-secret-at-least-32-chars',
   resave: false,
+  proxy: true,
   saveUninitialized: false,
   cookie: {
     maxAge: Number(process.env.SESSION_COOKIE_MAX_AGE) || 86400000, // 1 day
