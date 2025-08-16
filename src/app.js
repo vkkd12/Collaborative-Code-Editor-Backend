@@ -30,14 +30,14 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    maxAge: Number(process.env.SESSION_COOKIE_MAX_AGE) || 86400000,
-    secure: String(process.env.SESSION_COOKIE_SECURE || 'false') === 'true',
-    httpOnly: String(process.env.SESSION_COOKIE_HTTP_ONLY || 'true') === 'true',
-    sameSite: process.env.SESSION_COOKIE_SAME_SITE || 'lax'
+    maxAge: Number(process.env.SESSION_COOKIE_MAX_AGE) || 86400000, // 1 day
+    secure: process.env.NODE_ENV === 'production', // must be true in production
+    httpOnly: true,                                // keep true
+    sameSite: 'none'                               // required for cross-site cookies
   },
   store: process.env.NODE_ENV === 'production'
     ? MongoStore.create({ mongoUrl: process.env.MONGODB_URI })
-    : undefined // Use default MemoryStore in development
+    : undefined
 }));
 
 // CORS
