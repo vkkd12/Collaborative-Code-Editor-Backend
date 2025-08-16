@@ -22,21 +22,30 @@ export async function registerHandler(req, res) {
   res.status(201).json({ success: true, data: toJSONSafe(user) });
 }
 
-export async function loginHandler(req, res) {
+export async function loginHandler(req, res, next) {
   try {
     const { user } = await login(req.body);
     req.session.user = toJSONSafe(user);
-    // Debug log: session and cookies
-    console.log('Session after login:', req.session);
-    console.log('Set-Cookie header:', res.getHeader('Set-Cookie'));
-    res.json({
-      success: true,
-      data: { user: toJSONSafe(user) }
+
+    req.session.save(err => {
+      if (err) {
+        console.error("Session save error:", err);
+        return next(err);
+      }
+
+      // Debug: log Set-Cookie after save
+      console.log("Session after save:", req.session);
+      console.log("Set-Cookie header:", res.getHeader("Set-Cookie"));
+
+      res.json({
+        success: true,
+        data: { user: toJSONSafe(user) }
+      });
     });
   } catch (err) {
     res.status(err.status || 500).json({
       success: false,
-      message: err.message || 'ServerSide Login failed'
+      message: err.message || "ServerSide Login failed"
     });
   }
 }
