@@ -17,6 +17,7 @@ import "dotenv/config.js";
 
 
 const app = express();
+app.set("trust proxy", 1);
 
 // Middleware
 app.use(express.json({ limit: '1mb' }));
