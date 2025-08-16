@@ -43,12 +43,16 @@ app.use(session({
 // CORS
 const corsOrigin = (process.env.CORS_ORIGIN || '').split(',').filter(Boolean);
 console.log('CORS Origin:', corsOrigin);
-app.use(
-  cors({
-    origin: corsOrigin.length ? corsOrigin : 'http://localhost:3000',
-    credentials: true
-  })
-);
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || corsOrigin.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true
+}));
 
 // Helmet
 app.use(
