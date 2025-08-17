@@ -7,9 +7,20 @@ const fileSchema = new Schema({
     ref: 'Project',
     required: true
   },
-  path: {
+  name: {
     type: String,
     required: true
+  },
+  type: {
+    type: String,
+    enum: ['file', 'folder'],
+    default: 'file',
+    required: true
+  },
+  parent: {
+    type: Schema.Types.ObjectId,
+    ref: 'File',
+    default: null
   },
   content: {
     type: String,

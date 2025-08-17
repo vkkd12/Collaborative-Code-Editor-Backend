@@ -17,7 +17,9 @@ import "dotenv/config.js";
 
 
 const app = express();
-app.set("trust proxy", 1);
+if (process.env.NODE_ENV === 'production') {
+  app.set("trust proxy", 1);
+}
 
 // Middleware
 app.use(express.json({ limit: '1mb' }));
@@ -29,17 +31,15 @@ app.use(morgan('dev'));
 app.use(session({
   secret: process.env.SESSION_SECRET || 'change-me-session-secret-at-least-32-chars',
   resave: false,
-  proxy: true,
+  proxy: process.env.NODE_ENV === 'production',
   saveUninitialized: false,
   cookie: {
-    maxAge: Number(process.env.SESSION_COOKIE_MAX_AGE) || 86400000, // 1 day
-    secure: process.env.NODE_ENV === 'production', // must be true in production
-    httpOnly: true,                                // keep true
-    sameSite: 'none'                               // required for cross-site cookies
+    maxAge: Number(process.env.SESSION_COOKIE_MAX_AGE) || 86400000,
+    secure: process.env.NODE_ENV === 'production',
+    httpOnly: String(process.env.SESSION_COOKIE_HTTP_ONLY || 'true') === 'true',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
   },
-  store: process.env.NODE_ENV === 'production'
-    ? MongoStore.create({ mongoUrl: process.env.MONGODB_URI })
-    : undefined
+  store: MongoStore.create({ mongoUrl: process.env.MONGODB_URI })
 }));
 
 // CORS
@@ -47,19 +47,19 @@ const corsOrigin = (process.env.CORS_ORIGIN || '').split(',').filter(Boolean);
 console.log('CORS Origin:', corsOrigin);
 app.use(cors({
   origin: function (origin, callback) {
-    if (!origin || corsOrigin.includes(origin)) {
+    if (!origin || corsOrigin.length === 0 || corsOrigin.includes(origin)) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
     }
   },
-  credentials: true
+  credentials: String(process.env.CORS_CREDENTIALS || 'true') === 'true'
 }));
 
 // Helmet
 app.use(
   helmet({
-    contentSecurityPolicy: String(process.env.HELMET_CONTENT_SECURITY_POLICY || 'false') === 'true',
+    contentSecurityPolicy: String(process.env.HELMET_CONTENT_SECURITY_POLICY || (process.env.NODE_ENV === 'production' ? 'true' : 'false')) === 'true',
     crossOriginEmbedderPolicy: false
   })
 );

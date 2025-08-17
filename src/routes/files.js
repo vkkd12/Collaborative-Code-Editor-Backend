@@ -6,7 +6,8 @@ import {
   deleteFileHandler,
   getFileHandler,
   updateFileHandler,
-  getFilesForProjectHandler
+  getFilesForProjectHandler,
+  getFilesTreeForProjectHandler
 } from '../controllers/fileController.js';
 
 const router = Router({ mergeParams: true });
@@ -15,6 +16,7 @@ router.use(auth);
 
 router.post('/', asyncHandler(createFileHandler));
 router.get('/', asyncHandler(getFilesForProjectHandler));
+router.get('/tree', asyncHandler(getFilesTreeForProjectHandler));
 router.get('/:fileId', asyncHandler(getFileHandler));
 router.patch('/:fileId', asyncHandler(updateFileHandler));
 router.delete('/:fileId', asyncHandler(deleteFileHandler));
